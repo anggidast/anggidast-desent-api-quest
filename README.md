@@ -5,7 +5,7 @@ Simple REST API in Go using the standard library only.
 ## Run
 
 ```bash
-go run ./cmd/api
+go run .
 ```
 
 Server address:
