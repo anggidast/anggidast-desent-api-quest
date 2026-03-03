@@ -28,12 +28,16 @@ func TestAPIFlow(t *testing.T) {
 	})
 
 	t.Run("echo returns same JSON", func(t *testing.T) {
-		resp := mustRequest(t, handler, "POST", "/echo", `{"hello":"world","count":2}`, "")
+		requestBody := `{"z":1,"a":{"second":2,"first":1},"items":[{"b":2,"a":1}]}`
+		resp := mustRequest(t, handler, "POST", "/echo", requestBody, "")
 		assertStatus(t, resp, http.StatusOK)
 
-		body := decodeBody[map[string]any](t, resp)
-		if body["hello"] != "world" {
-			t.Fatalf("unexpected echo response: %#v", body)
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatalf("read response body: %v", err)
+		}
+		if string(body) != requestBody {
+			t.Fatalf("expected exact echo body %q, got %q", requestBody, string(body))
 		}
 	})
 
