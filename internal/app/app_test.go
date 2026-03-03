@@ -15,8 +15,6 @@ func TestAPIFlow(t *testing.T) {
 	application := app.New()
 	handler := application.Handler()
 
-	token := issueToken(t, handler, "admin", "secret")
-
 	t.Run("ping returns success true", func(t *testing.T) {
 		resp := mustRequest(t, handler, "GET", "/ping", "", "")
 		assertStatus(t, resp, http.StatusOK)
@@ -61,54 +59,36 @@ func TestAPIFlow(t *testing.T) {
 		assertStatus(t, resp, http.StatusBadRequest)
 	})
 
-	t.Run("protected books listing requires token", func(t *testing.T) {
-		resp := mustRequest(t, handler, "GET", "/books", "", "")
-		assertStatus(t, resp, http.StatusUnauthorized)
-	})
-
-	t.Run("protected books listing rejects malformed bearer", func(t *testing.T) {
-		resp := mustRequest(t, handler, "GET", "/books", "", "Token nope")
-		assertStatus(t, resp, http.StatusUnauthorized)
-	})
-
-	t.Run("get books list supports auth and pagination", func(t *testing.T) {
+	t.Run("get books list supports pagination", func(t *testing.T) {
 		_ = mustRequest(t, handler, "POST", "/books", `{"title":"Refactoring","author":"Martin Fowler","year":1999}`, "")
 		_ = mustRequest(t, handler, "POST", "/books", `{"title":"Patterns","author":"Erich Gamma","year":1994}`, "")
 
-		resp := mustRequest(t, handler, "GET", "/books?page=1&limit=2", "", "Bearer "+token)
+		resp := mustRequest(t, handler, "GET", "/books?page=1&limit=2", "", "")
 		assertStatus(t, resp, http.StatusOK)
 
-		body := decodeBody[map[string]any](t, resp)
-		items := body["data"].([]any)
-		if len(items) != 2 {
+		body := decodeBody[[]map[string]any](t, resp)
+		if len(body) != 2 {
 			t.Fatalf("expected 2 items, got %#v", body)
-		}
-		if int(body["total"].(float64)) < 3 {
-			t.Fatalf("expected total >= 3, got %#v", body)
-		}
-		if int(body["page"].(float64)) != 1 || int(body["limit"].(float64)) != 2 {
-			t.Fatalf("unexpected pagination metadata: %#v", body)
 		}
 	})
 
 	t.Run("get books list supports author filter", func(t *testing.T) {
-		resp := mustRequest(t, handler, "GET", "/books?author=martin%20fowler", "", "Bearer "+token)
+		resp := mustRequest(t, handler, "GET", "/books?author=martin%20fowler", "", "")
 		assertStatus(t, resp, http.StatusOK)
 
-		body := decodeBody[map[string]any](t, resp)
-		items := body["data"].([]any)
-		if len(items) != 1 {
+		body := decodeBody[[]map[string]any](t, resp)
+		if len(body) != 1 {
 			t.Fatalf("expected one filtered item, got %#v", body)
 		}
 	})
 
 	t.Run("get books list rejects invalid page", func(t *testing.T) {
-		resp := mustRequest(t, handler, "GET", "/books?page=0", "", "Bearer "+token)
+		resp := mustRequest(t, handler, "GET", "/books?page=0", "", "")
 		assertStatus(t, resp, http.StatusBadRequest)
 	})
 
 	t.Run("get books list rejects invalid limit", func(t *testing.T) {
-		resp := mustRequest(t, handler, "GET", "/books?limit=0", "", "Bearer "+token)
+		resp := mustRequest(t, handler, "GET", "/books?limit=0", "", "")
 		assertStatus(t, resp, http.StatusBadRequest)
 	})
 

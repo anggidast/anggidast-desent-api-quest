@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"desent-api-quest/internal/handler"
-	"desent-api-quest/internal/middleware"
 	"desent-api-quest/internal/repository"
 	"desent-api-quest/internal/router"
 	"desent-api-quest/internal/token"
@@ -28,8 +27,6 @@ func New() *App {
 	authHandler := handler.NewAuthHandler(authUsecase)
 	bookHandler := handler.NewBookHandler(bookUsecase)
 
-	authMiddleware := middleware.RequireBearerToken(authUsecase.ValidateToken)
-
 	return &App{
 		addr: ":8080",
 		handler: router.New(
@@ -37,7 +34,6 @@ func New() *App {
 			echoHandler,
 			authHandler,
 			bookHandler,
-			authMiddleware,
 		),
 	}
 }

@@ -56,12 +56,7 @@ func (h *BookHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpjson.WriteJSON(w, http.StatusOK, map[string]any{
-		"data":  result.Items,
-		"total": result.TotalItems,
-		"page":  result.Page,
-		"limit": result.Limit,
-	})
+	httpjson.WriteJSON(w, http.StatusOK, result.Items)
 }
 
 func (h *BookHandler) GetByID(w http.ResponseWriter, r *http.Request) {

@@ -20,7 +20,7 @@ http://localhost:8080
 - `POST /echo`
 - `POST /auth/token`
 - `POST /books`
-- `GET /books` (requires Bearer token)
+- `GET /books`
 - `GET /books/{id}`
 - `PUT /books/{id}`
 - `DELETE /books/{id}`
@@ -34,6 +34,5 @@ curl -X POST http://localhost:8080/auth/token \
 ```
 
 ```bash
-curl http://localhost:8080/books \
-  -H 'Authorization: Bearer YOUR_TOKEN'
+curl http://localhost:8080/books
 ```
