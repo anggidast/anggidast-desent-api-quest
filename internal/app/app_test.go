@@ -78,9 +78,16 @@ func TestAPIFlow(t *testing.T) {
 		resp := mustRequest(t, handler, "GET", "/books?page=1&limit=2", "", "Bearer "+token)
 		assertStatus(t, resp, http.StatusOK)
 
-		body := decodeBody[[]map[string]any](t, resp)
-		if len(body) != 2 {
+		body := decodeBody[map[string]any](t, resp)
+		items := body["data"].([]any)
+		if len(items) != 2 {
 			t.Fatalf("expected 2 items, got %#v", body)
+		}
+		if int(body["total"].(float64)) < 3 {
+			t.Fatalf("expected total >= 3, got %#v", body)
+		}
+		if int(body["page"].(float64)) != 1 || int(body["limit"].(float64)) != 2 {
+			t.Fatalf("unexpected pagination metadata: %#v", body)
 		}
 	})
 
@@ -88,8 +95,9 @@ func TestAPIFlow(t *testing.T) {
 		resp := mustRequest(t, handler, "GET", "/books?author=martin%20fowler", "", "Bearer "+token)
 		assertStatus(t, resp, http.StatusOK)
 
-		body := decodeBody[[]map[string]any](t, resp)
-		if len(body) != 1 {
+		body := decodeBody[map[string]any](t, resp)
+		items := body["data"].([]any)
+		if len(items) != 1 {
 			t.Fatalf("expected one filtered item, got %#v", body)
 		}
 	})
