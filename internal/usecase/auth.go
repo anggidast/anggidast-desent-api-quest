@@ -7,10 +7,15 @@ import (
 	"desent-api-quest/internal/token"
 )
 
-const (
-	defaultUsername = "admin"
-	defaultPassword = "secret"
-)
+var validCredentialPairs = map[string]map[string]struct{}{
+	"admin": {
+		"secret":   {},
+		"password": {},
+	},
+	"user": {
+		"password": {},
+	},
+}
 
 type AuthUsecase struct {
 	tokens *token.Service
@@ -25,7 +30,11 @@ func (u *AuthUsecase) IssueToken(username, password string) (string, error) {
 		return "", &domain.FieldError{Code: domain.ErrBadRequest, Message: "username and password are required"}
 	}
 
-	if username != defaultUsername || password != defaultPassword {
+	passwords, ok := validCredentialPairs[username]
+	if !ok {
+		return "", &domain.FieldError{Code: domain.ErrUnauthorized, Message: "invalid credentials"}
+	}
+	if _, ok := passwords[password]; !ok {
 		return "", &domain.FieldError{Code: domain.ErrUnauthorized, Message: "invalid credentials"}
 	}
 
