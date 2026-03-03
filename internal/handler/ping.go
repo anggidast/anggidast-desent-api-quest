@@ -13,5 +13,5 @@ func NewPingHandler() *PingHandler {
 }
 
 func (h *PingHandler) Handle(w http.ResponseWriter, _ *http.Request) {
-	httpjson.WriteJSON(w, http.StatusOK, map[string]string{"message": "pong"})
+	httpjson.WriteJSON(w, http.StatusOK, map[string]bool{"success": true})
 }

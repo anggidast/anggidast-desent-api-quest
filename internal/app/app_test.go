@@ -17,13 +17,13 @@ func TestAPIFlow(t *testing.T) {
 
 	token := issueToken(t, handler, "admin", "secret")
 
-	t.Run("ping returns pong", func(t *testing.T) {
+	t.Run("ping returns success true", func(t *testing.T) {
 		resp := mustRequest(t, handler, "GET", "/ping", "", "")
 		assertStatus(t, resp, http.StatusOK)
 
-		body := decodeBody[map[string]string](t, resp)
-		if body["message"] != "pong" {
-			t.Fatalf("expected pong, got %#v", body)
+		body := decodeBody[map[string]bool](t, resp)
+		if body["success"] != true {
+			t.Fatalf("expected true, got %#v", body)
 		}
 	})
 
