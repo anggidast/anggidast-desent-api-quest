@@ -3,7 +3,6 @@ package httpjson
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"strings"
 
@@ -30,28 +29,6 @@ func WriteJSON(w http.ResponseWriter, status int, payload any) {
 func WriteError(w http.ResponseWriter, err error) {
 	status, body := MapError(err)
 	WriteJSON(w, status, body)
-}
-
-func DecodeJSON(r *http.Request, dst any) error {
-	if r.Body == nil {
-		return &domain.FieldError{Code: domain.ErrBadRequest, Message: "request body is required"}
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(dst); err != nil {
-		if errors.Is(err, io.EOF) {
-			return &domain.FieldError{Code: domain.ErrBadRequest, Message: "request body is required"}
-		}
-		return &domain.FieldError{Code: domain.ErrBadRequest, Message: "invalid JSON body"}
-	}
-
-	var extra any
-	if err := decoder.Decode(&extra); err != io.EOF {
-		return &domain.FieldError{Code: domain.ErrBadRequest, Message: "request body must contain a single JSON value"}
-	}
-
-	return nil
 }
 
 func MapError(err error) (int, ErrorResponse) {
